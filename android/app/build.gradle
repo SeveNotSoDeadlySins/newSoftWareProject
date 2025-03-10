@@ -10,12 +10,12 @@ android {
     namespace = "com.example.new_project"
 
     // Use compileSdkVersion from rootProject
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 35
 
     defaultConfig {
         applicationId "com.example.new_project"
         minSdkVersion 23
-        targetSdkVersion 34     // or 33
+        targetSdkVersion 35    // or 34 if 35 still fails
         versionCode 1
         versionName "1.0"
     }
