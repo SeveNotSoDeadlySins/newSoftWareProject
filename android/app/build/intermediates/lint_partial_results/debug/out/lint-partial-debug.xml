@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.1.0" type="partial_results">
+    <map id="UnsafeIntentLaunch">
+            <map id="unprotected">
+                <entry
+                    name="com.example.new_project.MainActivity"
+                    boolean="true"/>
+            </map>
+    </map>
+    <map id="NotificationPermission">
+        <entry
+            name="className"
+            string="com/google/firebase/messaging/DisplayNotification"/>
+        <location id="class"
+            file="$GRADLE_USER_HOME/caches/transforms-3/eeb5dc5dab39dc73d0bb488b5f79c2c4/transformed/jetified-firebase-messaging-23.1.2/jars/classes.jar"/>
+    </map>
+    <map id="UnusedResources">
+        <entry
+            name="model"
+            string="attr[android_colorBackground(R)],drawable[launch_background(U)],mipmap[ic_launcher(U)],style[LaunchTheme(U),NormalTheme(U)];3^1,4^0;;;"/>
+    </map>
+
+</incidents>
