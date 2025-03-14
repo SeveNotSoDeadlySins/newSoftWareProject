@@ -30,13 +30,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  
+  shared_preferences: ^2.2.2
 
   # UI Components
   cupertino_icons: ^1.0.8
 
   # Firebase Dependencies
-  firebase_core: ^2.25.4 
-  firebase_auth: ^4.17.6  
+  firebase_core: ^2.32.0 
+  firebase_auth: ^4.16.0  
   cloud_firestore: ^4.15.6
 
   # Google Sign-In

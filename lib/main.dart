@@ -1,79 +1,78 @@
 import 'package:flutter/material.dart';
-import 'signup_page.dart'; // ✅ Import your sign-up page
+import 'package:firebase_core/firebase_core.dart';
+import 'screens/welcome_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/signup_screen.dart';
+import 'screens/home_screen.dart';
+import 'services/auth_service.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Initialize Firebase
+
+  bool isDarkMode = await getThemePreference(); // Load theme preference
+
+  runApp(MyApp(isDarkMode: isDarkMode)); // Pass theme preference to MyApp
 }
 
+// Save Dark Mode Preference
+Future<void> saveThemePreference(bool isDarkMode) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isDarkMode', isDarkMode);
+}
+
+// Load Dark Mode Preference
+Future<bool> getThemePreference() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('isDarkMode') ?? false; // Default: Light mode
+}
+
+// Theme Provider (Manages Dark/Light Mode)
+class ThemeProvider extends ChangeNotifier {
+  bool isDarkMode;
+
+  ThemeProvider(this.isDarkMode);
+
+  void toggleTheme() {
+    isDarkMode = !isDarkMode;
+    saveThemePreference(isDarkMode);
+    notifyListeners();
+  }
+}
+
+// Updated MyApp with Theme Provider
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isDarkMode;
+
+  const MyApp({super.key, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 20), // Add spacing
-
-            // ✅ Add Sign-Up Button Below Counter
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUpPage()),
-                );
-              },
-              child: const Text("Sign Up"),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+            create: (context) => AuthService()), // Authentication Provider
+        ChangeNotifierProvider(
+            create: (context) => ThemeProvider(isDarkMode)), // Theme Provider
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Flutter App',
+            theme:
+                themeProvider.isDarkMode ? ThemeData.dark() : ThemeData.light(),
+            initialRoute: '/welcome',
+            routes: {
+              '/welcome': (context) => const WelcomeScreen(),
+              '/login': (context) => const LoginScreen(),
+              '/signup': (context) => const SignupScreen(),
+              '/home': (context) => const HomeScreen(),
+            },
+          );
+        },
       ),
     );
   }
