@@ -33,6 +33,10 @@ dependencies:
   
   shared_preferences: ^2.2.2
 
+  flame: ^1.14.0
+  flame_audio: ^2.11.1  # (Optional) For adding sound effects
+  flame_tiled: ^1.10.0  # (Optional) If you use tiled maps
+
   # UI Components
   cupertino_icons: ^1.0.8
 

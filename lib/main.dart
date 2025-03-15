@@ -4,6 +4,7 @@ import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/waiting_verification_screen.dart';
 import 'services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,7 +32,7 @@ Future<bool> getThemePreference() async {
 
 // Theme Provider (Manages Dark/Light Mode)
 class ThemeProvider extends ChangeNotifier {
-  bool isDarkMode;
+  bool isDarkMode; // Dark Mode enabled/disabled
 
   ThemeProvider(this.isDarkMode);
 
@@ -67,8 +68,9 @@ class MyApp extends StatelessWidget {
             initialRoute: '/welcome',
             routes: {
               '/welcome': (context) => const WelcomeScreen(),
-              '/login': (context) => const LoginScreen(),
+              '/login': (context) => LoginScreen(),
               '/signup': (context) => const SignupScreen(),
+              "/waiting_verification": (context) => WaitingVerificationScreen(),
               '/home': (context) => const HomeScreen(),
             },
           );
