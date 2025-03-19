@@ -27,21 +27,28 @@ class AuthService extends ChangeNotifier {
         password: password,
       );
 
-      //  Send Email Verification
+      // 👇 TEMP FIX: Convert List<Object?> to Map<String, dynamic> if needed
+      Map<String, dynamic> userData =
+          userCredential.additionalUserInfo?.profile?.cast<String, dynamic>() ??
+              {};
+
+      // Send Email Verification
       await userCredential.user!.sendEmailVerification();
 
-      //  Store additional user data in Firestore
+      // Store user data in Firestore
       await _firestore.collection("users").doc(userCredential.user!.uid).set({
         "uid": userCredential.user!.uid,
         "username": username,
         "email": email,
-        "isVerified": false, // Track verification status
+        "isVerified": false,
         "createdAt": DateTime.now(),
+        "extraData": userData, // 👈 Avoids List<Object?> issue
       });
 
       return "Verification email sent. Please verify your email.";
-    } catch (err) {
-      print("Error: $err");
+    } catch (err, stackTrace) {
+      print("🔥 ERROR: $err");
+      print("🔥 STACKTRACE: $stackTrace");
       return "Error: $err";
     }
   }
