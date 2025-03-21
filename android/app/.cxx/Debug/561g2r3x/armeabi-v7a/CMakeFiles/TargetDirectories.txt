@@ -1,0 +1,2 @@
+C:/xampp/htdocs/newSoftWareProject/android/app/.cxx/Debug/561g2r3x/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/xampp/htdocs/newSoftWareProject/android/app/.cxx/Debug/561g2r3x/armeabi-v7a/CMakeFiles/rebuild_cache.dir
