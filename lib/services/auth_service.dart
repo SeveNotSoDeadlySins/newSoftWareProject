@@ -17,7 +17,7 @@ class AuthService extends ChangeNotifier {
     });
   }
 
-  // Sign Up with Firestore
+  //  Sign Up with Firestore and Send Email Verification
   Future<String?> signUpWithEmail(
       String email, String password, String username) async {
     try {
@@ -27,29 +27,33 @@ class AuthService extends ChangeNotifier {
         password: password,
       );
 
-      // * Store additional user data in Firestore**
+      // 👇 TEMP FIX: Convert List<Object?> to Map<String, dynamic> if needed
+      Map<String, dynamic> userData =
+          userCredential.additionalUserInfo?.profile?.cast<String, dynamic>() ??
+              {};
+
+      // Send Email Verification
+      await userCredential.user!.sendEmailVerification();
+
+      // Store user data in Firestore
       await _firestore.collection("users").doc(userCredential.user!.uid).set({
-        "uid": userCredential.user!.uid, // User's unique ID
+        "uid": userCredential.user!.uid,
         "username": username,
         "email": email,
+        "isVerified": false,
         "createdAt": DateTime.now(),
+        "extraData": userData, // 👈 Avoids List<Object?> issue
       });
 
-      // * Store locally for session management**
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_id', userCredential.user!.uid);
-
-      _user = userCredential.user;
-      notifyListeners();
-
-      return "Success"; // Sign-up successful
-    } catch (err) {
-      print("Error: $err");
+      return "Verification email sent. Please verify your email.";
+    } catch (err, stackTrace) {
+      print("🔥 ERROR: $err");
+      print("🔥 STACKTRACE: $stackTrace");
       return "Error: $err";
     }
   }
 
-  // * Login with Email**
+  //  Login with Email (Check if Email is Verified)
   Future<String?> loginWithEmail(String email, String password) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -57,7 +61,13 @@ class AuthService extends ChangeNotifier {
         password: password,
       );
 
-      // * Store locally for session management**
+      //  Check if email is verified
+      if (!userCredential.user!.emailVerified) {
+        await _auth.signOut(); // Log them out immediately
+        return "Please verify your email before logging in.";
+      }
+
+      //  Store locally for session management
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_id', userCredential.user!.uid);
 
@@ -71,7 +81,29 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  // * Logout**
+  //  Check if Email is Verified
+  Future<bool> isEmailVerified() async {
+    User? user = _auth.currentUser;
+    await user?.reload(); // Refresh user data
+    return user?.emailVerified ?? false;
+  }
+
+  //  Resend Verification Email
+  Future<String?> resendVerificationEmail() async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        return "Verification email resent. Check your inbox.";
+      }
+      return "User is already verified or not logged in.";
+    } catch (err) {
+      print("Error: $err");
+      return "Error: $err";
+    }
+  }
+
+  //  Logout
   Future<void> logout() async {
     await _auth.signOut();
     SharedPreferences prefs = await SharedPreferences.getInstance();
