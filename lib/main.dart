@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
               '/login': (context) => LoginScreen(),
               '/signup': (context) => const SignupScreen(),
               "/waiting_verification": (context) => WaitingVerificationScreen(),
-              '/home': (context) => const HomeScreen(),
+              '/home': (context) => HomeScreen(),
             },
           );
         },

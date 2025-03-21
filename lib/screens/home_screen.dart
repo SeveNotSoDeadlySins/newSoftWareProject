@@ -1,29 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../main.dart'; // Need this for the theme
+import 'package:new_project/screens/game_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Home Screen"),
-        actions: [
-          Switch(
-            value: themeProvider.isDarkMode,
-            onChanged: (value) {
-              themeProvider.toggleTheme();
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text("Home Screen")),
       body: Center(
-        child: Text(
-            "Dark Mode is ${themeProvider.isDarkMode ? "Enabled" : "Disabled"}"),
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => GameScreen()),
+            );
+          },
+          child: Text("Start Game"),
+        ),
       ),
     );
   }

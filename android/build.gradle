@@ -1,6 +1,6 @@
 buildscript {
-    ext.kotlin_version = "1.8.22"         // or "1.9.0"
-    ext.compileSdkVersion = 34           // or 33 if 34 still fails
+    ext.kotlin_version = '1.9.0'
+    ext.compileSdkVersion = 34
 
     repositories {
         google()
@@ -9,7 +9,6 @@ buildscript {
     dependencies {
         // Android Gradle Plugin
         classpath "com.android.tools.build:gradle:8.1.2"
-
         // Google Services
         classpath "com.google.gms:google-services:4.4.2"
 
