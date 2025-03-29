@@ -1,131 +1,57 @@
-import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
-import 'package:new_project/games/my_game.dart';
-import 'package:new_project/services/game_service.dart';
+import 'package:flutter/material.dart';
+import '../games/litter_catcher_game.dart';
+import '../widgets/pause_menu.dart';
 
-class GameScreen extends StatefulWidget {
-  @override
-  _GameScreenState createState() => _GameScreenState();
-}
+class GameScreen extends StatelessWidget {
+  final String controlMode;
 
-class _GameScreenState extends State<GameScreen> {
-  late Future<Map<String, dynamic>?> gameData;
-  MyGame? myGame;
-  bool isPaused = false; // Track if game is paused
-
-  @override
-  void initState() {
-    super.initState();
-    gameData = GameService().fetchParagraph();
-  }
+  const GameScreen({super.key, required this.controlMode});
 
   @override
   Widget build(BuildContext context) {
+    final game = LitterCatcherGame(controlMode: controlMode);
+
     return Scaffold(
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: gameData,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError || snapshot.data == null) {
-            return Center(child: Text("Failed to load game data"));
-          }
-
-          myGame = MyGame(snapshot.data!);
-
-          return Stack(
-            children: [
-              GameWidget(game: myGame!),
-
-              // Pause button (Top-right corner)
-              Positioned(
-                top: 20,
-                right: 20,
+      body: Stack(
+        children: [
+          GameWidget(
+            game: game,
+            overlayBuilderMap: {
+              'PauseMenu': (context, game) =>
+                  PauseMenu(game: game as LitterCatcherGame),
+            },
+            initialActiveOverlays: const [],
+          ),
+          Align(
+            alignment: Alignment.topRight,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: IconButton(
-                  icon: Icon(Icons.pause, color: Colors.white, size: 40),
+                  icon: const Icon(Icons.pause, color: Colors.black, size: 32),
                   onPressed: () {
-                    setState(() => isPaused = true);
-                    myGame?.pauseGame();
+                    game.pauseGame();
                   },
                 ),
               ),
-
-              // Pause Menu (Only visible when paused)
-              if (isPaused)
-                Positioned.fill(
-                  child: Center(
-                    child: Material(
-                      color:
-                          Colors.black.withOpacity(0.7), // Background overlay
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() => isPaused = false);
-                              myGame?.resumeGame();
-                            },
-                            child: Text("Resume"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushReplacementNamed(context, '/home');
-                            },
-                            child: Text("Home"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Future Settings Menu
-                            },
-                            child: Text("Settings"),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-              // Drag words at the bottom
-              Positioned(
-                bottom: 20,
-                left: 0,
-                right: 0,
-                child: Wrap(
-                  spacing: 10, // Space between words
-                  runSpacing: 10, // Space between rows if wrapping occurs
-                  children: myGame!.draggableWords.map((word) {
-                    return Draggable<String>(
-                      data: word.word,
-                      feedback: Material(
-                        color: Colors.transparent,
-                        child: Text(
-                          word.word,
-                          style: TextStyle(
-                              fontSize: 24,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Text(
-                          word.word,
-                          style: TextStyle(fontSize: 24, color: Colors.white),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          );
-        },
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            left: 20,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const EcoMatchScreen()),
+                );
+              },
+              child: const Text('Play Eco Match'),
+            ),
+          ),
+        ],
       ),
     );
   }

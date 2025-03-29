@@ -1,6 +1,6 @@
 import 'package:flame/game.dart';
 import 'package:new_project/games/paragraph_component.dart';
-import 'package:new_project/games/draggable_word.dart';
+import 'package:new_project/components/draggable_card.dart';
 
 class MyGame extends FlameGame {
   late ParagraphComponent paragraph;
@@ -22,8 +22,8 @@ class MyGame extends FlameGame {
     draggableWords = missingWords
         .asMap()
         .entries
-        .map((entry) =>
-            DraggableWord(entry.value, Vector2(100 * (entry.key + 1), 400)))
+        .map((entry) => DraggableWord(
+            entry.value, Vector2(100 * (entry.key + 1), 400), paragraph))
         .toList();
 
     for (var word in draggableWords) {

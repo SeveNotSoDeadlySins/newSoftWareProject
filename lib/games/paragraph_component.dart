@@ -5,11 +5,10 @@ class ParagraphComponent extends PositionComponent {
   final String text;
   final List<String> missingWords;
   final Map<int, String> placedWords = {};
+  final List<Vector2> blankPositions = [];
 
-  // Style for your paragraph text
   final TextStyle style = const TextStyle(fontSize: 24, color: Colors.white);
-
-  double lineHeight = 30; // Space between lines
+  double lineHeight = 40;
 
   ParagraphComponent(this.text, this.missingWords);
 
@@ -19,45 +18,71 @@ class ParagraphComponent extends PositionComponent {
 
     final words = text.split(' ');
     double xPos = 20;
-    double yPos = 50;
-    double screenWidth = size.x; // The width of your game screen
+    double yPos = 0;
+    double screenWidth = size.x;
+
+    blankPositions.clear();
 
     for (int i = 0; i < words.length; i++) {
-      // If word is missing, show "___" or a placed word
-      String displayText = missingWords.contains(words[i])
-          ? (placedWords[i] ?? "___")
-          : words[i];
+      String displayText;
+      if (missingWords.contains(words[i])) {
+        if (placedWords.containsKey(i)) {
+          displayText = placedWords[i]!;
+        } else {
+          displayText = "___";
+        }
+      } else {
+        displayText = words[i];
+      }
 
-      // 1. Create a TextPainter for each word
       final textSpan = TextSpan(text: displayText, style: style);
-      final textPainter = TextPainter(
-        text: textSpan,
-        textDirection: TextDirection.ltr,
-      );
-      textPainter.layout(); // Layout the text to get its dimensions
+      final textPainter =
+          TextPainter(text: textSpan, textDirection: TextDirection.ltr);
+      textPainter.layout();
 
-      // 2. Measure the word's width
-      double wordWidth = textPainter.width + 20; // +20 for spacing
+      double wordWidth = textPainter.width + 20;
 
-      // 3. Wrap to a new line if it exceeds the screen width
       if (xPos + wordWidth > screenWidth) {
         xPos = 20;
         yPos += lineHeight;
       }
 
-      // 4. Paint the text onto the Canvas
+      // Paint the word
       canvas.save();
       canvas.translate(xPos, yPos);
       textPainter.paint(canvas, Offset.zero);
       canvas.restore();
 
-      // 5. Advance x-position for the next word
+      // Store blank position
+      if (missingWords.contains(words[i]) && !placedWords.containsKey(i)) {
+        blankPositions.add(Vector2(xPos, yPos));
+      }
+
       xPos += wordWidth;
     }
   }
 
-  void placeWord(int index, String word) {
-    placedWords[index] = word;
+  Vector2? placeWordAtPosition(String word, Vector2 wordPos) {
+    final wordsList = text.split(' ');
+
+    for (int i = 0, blankIndex = 0; i < wordsList.length; i++) {
+      if (missingWords.contains(wordsList[i]) && !placedWords.containsKey(i)) {
+        final blankPos = blankPositions[blankIndex];
+
+        final distance = (blankPos - wordPos).length;
+        print("💬 Checking '$word' → distance: $distance");
+
+        if (distance < 40) {
+          placedWords[i] = word;
+          print("✅ Snapped '$word' into index $i at $blankPos");
+          return blankPos;
+        }
+
+        blankIndex++;
+      }
+    }
+
+    return null;
   }
 
   bool checkCompletion() {

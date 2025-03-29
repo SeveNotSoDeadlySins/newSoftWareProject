@@ -6,25 +6,31 @@ class GameService {
   Future<Map<String, dynamic>?> fetchParagraph() async {
     try {
       DocumentSnapshot snapshot =
-          await _firestore.collection("game_data").doc("paragraph1").get();
+          await _firestore.collection("game_data").doc("levels").get();
 
       if (snapshot.exists) {
         Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
-        // Ensure 'words' is treated as a List
-        if (data.containsKey('words') && data['words'] is String) {
-          data['words'] = (data['words'] as String)
-              .replaceAll(RegExp(r'[\[\]\"]'), '') // Remove brackets & quotes
-              .split(', ') // Split into list
-              .map((word) => word.trim()) // Trim spaces
-              .toList();
-        }
+        String rawText = data['text'];
 
-        return data;
+        // Extract [word] using RegExp
+        final RegExp regex = RegExp(r'\[(\w+)\]');
+        final matches = regex.allMatches(rawText);
+
+        final List<String> words =
+            matches.map((match) => match.group(1)!).toList();
+
+        final cleanText = rawText.replaceAllMapped(regex, (_) => "___");
+
+        return {
+          'text': cleanText,
+          'words': words,
+        };
       }
     } catch (e) {
       print("Error fetching paragraph: $e");
     }
+
     return null;
   }
 }
