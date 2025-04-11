@@ -13,7 +13,7 @@ class Player extends SpriteComponent
   double _tiltX = 0;
 
   Player({required this.controlMode})
-      : super(size: Vector2(64, 64), anchor: Anchor.center);
+      : super(size: Vector2(100, 100), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {

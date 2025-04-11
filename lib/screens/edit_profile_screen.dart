@@ -50,17 +50,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
 
     try {
-      // Reauthenticate first
       await user.reauthenticateWithCredential(cred);
-
-      // Now safe to update email/password
       await user.verifyBeforeUpdateEmail(_emailController.text);
 
       if (_passwordController.text.isNotEmpty) {
         await user.updatePassword(_passwordController.text);
       }
 
-      // Update Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -78,6 +74,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         SnackBar(content: Text('Failed: ${e.toString()}')),
       );
     }
+
+    setState(() => isLoading = false);
+  }
+
+  Widget _buildInputField({
+    required String hint,
+    required TextEditingController controller,
+    bool obscure = false,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscure,
+        validator: validator,
+        style: const TextStyle(color: Colors.black),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
+      ),
+    );
   }
 
   @override
@@ -85,58 +118,78 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _currentPasswordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit Profile")),
+      backgroundColor: const Color(0xFF7F00FF),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF7F00FF),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title:
+            const Text("Edit Profile", style: TextStyle(color: Colors.white)),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(32.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              const SizedBox(height: 16),
-              TextFormField(
+              _buildInputField(
+                hint: "Username",
+                controller: _usernameController,
+                validator: (value) =>
+                    value == null || value.isEmpty ? "Username required" : null,
+              ),
+              _buildInputField(
+                hint: "Email",
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: Icon(Icons.email),
-                ),
                 validator: (value) => value == null || !value.contains('@')
-                    ? "Enter a valid email"
+                    ? "Enter valid email"
                     : null,
               ),
-              const SizedBox(height: 16),
-              TextFormField(
+              _buildInputField(
+                hint: "Current Password",
                 controller: _currentPasswordController,
-                decoration: const InputDecoration(
-                  labelText: "Current Password",
-                  prefixIcon: Icon(Icons.lock_outline),
-                ),
-                obscureText: true,
+                obscure: true,
                 validator: (value) => value == null || value.isEmpty
                     ? "Enter current password"
                     : null,
               ),
-              const SizedBox(height: 16),
-              TextFormField(
+              _buildInputField(
+                hint: "New Password (optional)",
                 controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: "New Password",
-                  prefixIcon: Icon(Icons.lock),
-                ),
-                obscureText: true,
+                obscure: true,
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: isLoading ? null : saveChanges,
-                child: isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text("Save Changes"),
-              ),
+              isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: Colors.white))
+                  : ElevatedButton(
+                      onPressed: saveChanges,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF7F00FF),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          side: const BorderSide(color: Colors.black),
+                        ),
+                        elevation: 6,
+                        shadowColor: Colors.black,
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      child: const Text("Save Changes"),
+                    ),
             ],
           ),
         ),

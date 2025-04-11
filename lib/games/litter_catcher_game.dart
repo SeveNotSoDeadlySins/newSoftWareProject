@@ -36,6 +36,9 @@ class LitterCatcherGame extends FlameGame with HasCollisionDetection {
     add(Background());
 
     player = Player(controlMode: controlMode);
+    player.position =
+        Vector2(size.x / 2, size.y - 100); // 100 px from the bottom
+    player.anchor = Anchor.center;
     add(player);
 
     // Score display
@@ -63,8 +66,8 @@ class LitterCatcherGame extends FlameGame with HasCollisionDetection {
     final litter = Litter(onMissed: handleMiss);
     litter
       ..position = Vector2.random()
-      ..x *= size.x
-      ..y = -30;
+      ..x *= size.x // random horizontal position
+      ..y = -30; // just above the screen
     add(litter);
   }
 

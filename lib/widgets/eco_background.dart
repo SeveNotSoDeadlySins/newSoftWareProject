@@ -11,7 +11,7 @@ class EcoBackground extends StatelessWidget {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFF7F00FF), // Deep Purple
+            Color(0xFFF3E5F5), // Deep Purple
             Color(0xFFE100FF), // Pink-Purple
           ],
           begin: Alignment.topLeft,

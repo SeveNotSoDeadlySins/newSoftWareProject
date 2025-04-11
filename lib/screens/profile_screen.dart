@@ -27,9 +27,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    loadUserData();
+    loadUserData(); // Load profile data on screen start
   }
 
+  // UI for showing simple info (icon + label in a row)
   Widget _buildInfoTile(IconData icon, String label) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -38,15 +39,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Icon(icon, color: Colors.amber),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16),
-          ),
+          Text(label, style: const TextStyle(fontSize: 16)),
         ],
       ),
     );
   }
 
+  // Pick and upload a new profile image
   Future<void> uploadProfilePicture() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -59,23 +58,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (user == null) return;
 
     try {
+      // Upload image to Firebase Storage
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('profile_pictures/${user.uid}.jpg');
-
-      // Upload the file
       await storageRef.putFile(file);
 
-      // Get the download URL after upload
+      // Get public URL for uploaded image
       final downloadUrl = await storageRef.getDownloadURL();
 
-      // Save the download URL to Firestore
+      // Save URL to Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .update({'profilePicture': downloadUrl});
 
-      // Update Firebase Auth photoURL (optional)
+      // Update Auth photo URL (optional)
       await user.updatePhotoURL(downloadUrl);
 
       setState(() {}); // Refresh UI
@@ -87,6 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  // Info tile for more detailed data (name/email/coins)
   Widget buildInfoTile(IconData icon, String label) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 6),
@@ -108,6 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // Load Firestore shop item data by ID
   Future<Map<String, dynamic>?> getItemById(String id) async {
     final query = await FirebaseFirestore.instance
         .collection('shop_items')
@@ -121,20 +121,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return null;
   }
 
+  // Delete both Firebase Auth and Firestore data
   Future<void> deleteAccount(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     final uid = user?.uid;
 
-    // Delete Firestore user data
     await FirebaseFirestore.instance.collection('users').doc(uid).delete();
-
-    // Delete Firebase Auth account
     await user?.delete();
 
-    // Go back to welcome screen or login
     Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
   }
 
+  // Load user data from Firestore + equipped background
   Future<void> loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     final userDoc = await FirebaseFirestore.instance
@@ -143,11 +141,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .get();
 
     final data = userDoc.data();
-    final accessoryId = data?['equipped']?['accessory'];
-
-    String? backgroundId;
     final equipped = data?['equipped'];
 
+    String? backgroundId;
     if (equipped is Map<String, dynamic> &&
         equipped.containsKey('background')) {
       backgroundId = equipped['background'];
@@ -155,25 +151,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (backgroundId != null) {
       final backgroundData = await getItemById(backgroundId);
-      equippedBackground = backgroundData?['image'];
-
-      Provider.of<BackgroundProvider>(context, listen: false)
-          .setBackground(equippedBackground);
-    }
-
-    if (backgroundId != null) {
-      final backgroundData = await getItemById(backgroundId);
-      final image = backgroundData?['image']; // should be like 'galaxy.png'
-
+      final image = backgroundData?['image'];
       if (image != null) {
         Provider.of<BackgroundProvider>(context, listen: false)
             .setBackground(image);
       }
-    }
-
-    if (accessoryId != null) {
-      final itemData = await getItemById(accessoryId);
-      accessoryImage = itemData?['image'];
     }
 
     setState(() {
@@ -188,11 +170,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final backgroundImage = bgProvider.background;
     final user = FirebaseAuth.instance.currentUser;
     final photoUrl = user?.photoURL;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Top curved container
+          // Top curved background/header
           Stack(
             children: [
               ClipPath(
@@ -216,6 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                 ),
               ),
+              // Back arrow
               Positioned(
                 top: 50,
                 left: 16,
@@ -224,6 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
+              // Avatar and image upload button
               Positioned(
                 top: 80,
                 left: 0,
@@ -261,37 +246,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
 
-          // Main card section
+          // Profile content section
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-
-                  // Main info tile (coin balance)
                   _buildInfoTile(Icons.monetization_on, "$coinBalance Coins"),
-
                   const SizedBox(height: 20),
-
-                  // Extra info tiles (static/dummy data for now)
                   buildInfoTile(Icons.account_box_rounded, userName),
-                  buildInfoTile(Icons.email,
-                      FirebaseAuth.instance.currentUser?.email ?? 'N/A'),
-
+                  buildInfoTile(Icons.email, user?.email ?? 'N/A'),
                   const SizedBox(height: 30),
 
-                  const SizedBox(height: 30),
+                  // Action buttons
                   buildGradientButton(
-                      context, "Edit Profile", Colors.deepPurple, () {
-                    Navigator.push(
+                    context,
+                    "Edit Profile",
+                    Colors.deepPurple,
+                    () => Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (_) => const EditProfileScreen()),
-                    );
-                  }),
-
-                  // Buttons
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   buildGradientButton(context, "Log Out", Colors.deepPurple,
                       () async {
                     await FirebaseAuth.instance.signOut();
@@ -300,7 +279,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }),
                   const SizedBox(height: 12),
                   buildGradientButton(context, "Delete Account", Colors.red,
-                      () => deleteAccount(context)),
+                      () {
+                    deleteAccount(context);
+                  }),
                 ],
               ),
             ),
@@ -311,17 +292,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
+// Custom clipper for curved top container
 class CurvedClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-    path.lineTo(0, size.height - 60); // start from bottom left
+    path.lineTo(0, size.height - 60);
     path.quadraticBezierTo(
-      size.width / 2, size.height, // control point
-      size.width, size.height - 60, // end point
+      size.width / 2,
+      size.height,
+      size.width,
+      size.height - 60,
     );
-    path.lineTo(size.width, 0); // top right
-    path.close(); // finish the path
+    path.lineTo(size.width, 0);
+    path.close();
     return path;
   }
 

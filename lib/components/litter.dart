@@ -6,7 +6,7 @@ class Litter extends SpriteComponent with HasGameRef<LitterCatcherGame> {
   final double speed = 150;
   final VoidCallback? onMissed;
 
-  Litter({this.onMissed}) : super(size: Vector2(32, 32), anchor: Anchor.center);
+  Litter({this.onMissed}) : super(size: Vector2(50, 50), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {

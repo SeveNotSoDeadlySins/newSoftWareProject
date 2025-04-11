@@ -1,15 +1,13 @@
 // File: lib/components/draggable_word.dart
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import '../games/paragraph_component.dart';
 import '../components/draggable_card.dart';
 
 class DraggableWord extends TextComponent with DragCallbacks {
   final String word;
-  final ParagraphComponent paragraph;
   late Vector2 _startPosition;
 
-  DraggableWord(this.word, Vector2 position, this.paragraph)
+  DraggableWord(this.word, Vector2 position)
       : super(
           text: word,
           position: position,

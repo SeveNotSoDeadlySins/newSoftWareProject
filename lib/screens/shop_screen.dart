@@ -87,7 +87,7 @@ class _ShopScreenState extends State<ShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFAA00FF), // Your gradient base purple
+        backgroundColor: const Color(0xFFF3E5F5),
         elevation: 0,
         actions: [
           Padding(
@@ -101,7 +101,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -118,10 +118,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSectionTitle("Accessories"),
-                      _buildItemList('accessory'),
-                      const SizedBox(height: 20),
-                      _buildSectionTitle("Backgrounds"),
+                      _buildSectionTitle("Backgrounds (other pages)"),
                       _buildItemList('background'),
                     ],
                   ),
@@ -161,16 +158,18 @@ class _ShopScreenState extends State<ShopScreen> {
           return const Center(child: Text("No items available."));
         }
 
-        return SizedBox(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index].data() as Map<String, dynamic>;
-              return _buildShopItem(item);
-            },
-          ),
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 3,
+          childAspectRatio: 0.5,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          children: items.map((doc) {
+            final item = doc.data() as Map<String, dynamic>;
+            return _buildShopItem(item);
+          }).toList(),
         );
       },
     );
@@ -249,8 +248,8 @@ class _ShopScreenState extends State<ShopScreen> {
                         ),
                         foregroundColor: Colors.black,
                         backgroundColor: isEquipped
-                            ? const Color(0xFF7B1FA2)
-                            : const Color(0xFF87CEEB),
+                            ? const Color.fromARGB(255, 81, 177, 94)
+                            : Colors.deepPurple,
                       ),
                       child: Text(
                         isOwned ? (isEquipped ? "Equipped" : "Equip") : "Buy",

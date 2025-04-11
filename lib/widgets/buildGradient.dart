@@ -14,7 +14,8 @@ Widget buildGradientButton(
   return ElevatedButton(
     onPressed: onTap,
     style: ElevatedButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 24, vertical: 10), // smaller
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       backgroundColor: backgroundImage == null ? fallbackColor : null,
     ).copyWith(
@@ -22,7 +23,7 @@ Widget buildGradientButton(
           ? MaterialStateProperty.all(Colors.transparent)
           : null,
       shadowColor: MaterialStateProperty.all(Colors.black),
-      elevation: MaterialStateProperty.all(6),
+      elevation: MaterialStateProperty.all(0),
     ),
     child: Ink(
       decoration: backgroundImage != null
@@ -35,7 +36,8 @@ Widget buildGradientButton(
           : null,
       child: Container(
         alignment: Alignment.center,
-        constraints: const BoxConstraints(minWidth: 100, minHeight: 40),
+        constraints:
+            const BoxConstraints(minWidth: 100, minHeight: 36), // reduced
         child: Text(
           text,
           style: const TextStyle(

@@ -12,16 +12,17 @@ class EcoMatchGame extends FlameGame with HasCollisionDetection {
 
   int _totalPairs = 0;
   int _matchedCount = 0;
-  double _difficultyMultiplier = 1.0; // NEW: controls speed and spawn intensity
 
   @override
   Future<void> onLoad() async {
     _pairs = await _service.fetchPairs();
 
+    // Preload all needed images (including bg)
     await images.loadAll(
       _pairs.expand((e) => [e.itemImage, e.binImage]).toList() + ['bg.png'],
     );
 
+    // Add background first so it's drawn behind everything
     final bg = SpriteComponent(
       sprite: await loadSprite('bg.png'),
       size: size,
@@ -29,38 +30,24 @@ class EcoMatchGame extends FlameGame with HasCollisionDetection {
     );
     add(bg);
 
+    // THEN add cards and bins
     spawnCards(_pairs);
   }
 
   void onMatchSuccess(String matchKey, String fact) {
     _matchedCount++;
 
-    // Increase difficulty every 3 matches
-    if (_matchedCount % 3 == 0) {
-      _difficultyMultiplier += 0.2;
-    }
-
     if (_matchedCount >= _totalPairs) {
       givePlayerRewards();
       overlays.add('LevelComplete');
       pauseEngine();
-    } else {
-      maybeSpawnMoreTrash();
     }
   }
 
-  void maybeSpawnMoreTrash() async {
-    final newPairs = await _service.fetchPairs(count: 1);
-    _pairs.addAll(newPairs);
-    spawnCards(newPairs);
-  }
-
   void givePlayerRewards() async {
-    const earnedXP = 10;
     const earnedCoins = 5;
 
     final playerService = PlayerDataService();
-    await playerService.addXP(earnedXP);
     await playerService.addCoins(earnedCoins);
   }
 
@@ -70,10 +57,14 @@ class EcoMatchGame extends FlameGame with HasCollisionDetection {
   }
 
   void spawnCards(List<CardPair> pairs) {
+    _matchedCount = 0;
+    _totalPairs = pairs.length;
+
     const spacing = 100.0;
     const itemY = 150.0;
     final binY = size.y - 150;
 
+    // Center items across screen
     final totalWidth = (pairs.length - 1) * spacing;
     final startX = (size.x - totalWidth) / 2;
 
@@ -87,16 +78,21 @@ class EcoMatchGame extends FlameGame with HasCollisionDetection {
         position: Vector2(startX + i * spacing, itemY),
         matchKey: pair.match,
         funFact: pair.fact,
-        speed:
-            100.0 * _difficultyMultiplier, // OPTIONAL: if you add speed support
+        size: Vector2(120, 120), // Add this line to make it bigger
       );
       add(item);
 
       if (!addedBins.contains(pair.match)) {
+        // Choose bin side: alternate or use index
+        final isLeft = addedBins.isEmpty; // first bin goes left, second right
+
+        final binX = isLeft ? size.x * 0.2 : size.x * 0.8;
+
         final bin = BinTargetComponent(
           sprite: Sprite(images.fromCache(pair.binImage)),
-          position: Vector2(startX + i * spacing, binY),
+          position: Vector2(binX, binY),
           matchKey: pair.match,
+          size: Vector2(150, 300),
         );
         add(bin);
         addedBins.add(pair.match);
@@ -106,6 +102,7 @@ class EcoMatchGame extends FlameGame with HasCollisionDetection {
 
   void checkAnswers() {
     final cards = children.whereType<DraggableCardComponent>();
+
     final allCorrect = cards.every((card) => card.isInCorrectBin);
 
     if (allCorrect) {

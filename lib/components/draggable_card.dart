@@ -7,7 +7,6 @@ class DraggableCardComponent extends SpriteComponent
     with DragCallbacks, HasGameRef<EcoMatchGame> {
   final String matchKey;
   final String funFact;
-  final double speed;
 
   bool isInCorrectBin = false; // Track if correct match
 
@@ -18,13 +17,11 @@ class DraggableCardComponent extends SpriteComponent
     required Vector2 position,
     required this.matchKey,
     required this.funFact,
-    this.speed = 100.0,
+    Vector2? size, // add this
   }) : super(
           sprite: sprite,
           position: position,
-          size: Vector2.all(64),
-          anchor: Anchor.center,
-          priority: 0,
+          size: size ?? Vector2.all(80), // default if not passed
         );
 
   @override

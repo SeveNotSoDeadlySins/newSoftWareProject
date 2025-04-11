@@ -42,7 +42,7 @@ class EcoMatchScreen extends StatelessWidget {
                     ),
                   ),
 
-              // ❌ Wrong Overlay
+              // ❌ Wrong Overlay (when the player gets a question wrong)
               'WrongOverlay': (context, _) => Center(
                     child: AlertDialog(
                       title: const Text("❌ Try Again!"),

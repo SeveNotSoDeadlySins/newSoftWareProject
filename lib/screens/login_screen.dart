@@ -15,31 +15,70 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool isLoading = false;
 
+  // Reusable styled input
+  Widget _buildInputField({
+    required String hint,
+    required TextEditingController controller,
+    bool obscure = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscure,
+        style: const TextStyle(color: Colors.black),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
+      backgroundColor: const Color(0xFF9900FF), // Purple background
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF9900FF),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text("Login", style: TextStyle(color: Colors.white)),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(32.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
+            _buildInputField(
+              hint: "Email",
               controller: emailController,
-              decoration: const InputDecoration(labelText: "Email"),
             ),
-            TextField(
+            _buildInputField(
+              hint: "Password",
               controller: passwordController,
-              decoration: const InputDecoration(labelText: "Password"),
-              obscureText: true,
+              obscure: true,
             ),
             const SizedBox(height: 20),
             isLoading
-                ? CircularProgressIndicator()
+                ? const CircularProgressIndicator(color: Colors.white)
                 : ElevatedButton(
                     onPressed: () async {
-                      setState(() {
-                        isLoading = true;
-                      });
+                      setState(() => isLoading = true);
 
                       final authService =
                           Provider.of<AuthService>(context, listen: false);
@@ -57,16 +96,32 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       );
 
-                      setState(() {
-                        isLoading = false;
-                      });
+                      setState(() => isLoading = false);
 
                       if (result == "Success") {
                         Navigator.pushReplacementNamed(context, "/home");
                       }
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7F00FF), // Deep purple
+                      foregroundColor: Colors.white, // Text color
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        side: const BorderSide(color: Colors.black), // Outline
+                      ),
+                      elevation: 6,
+                      shadowColor: Colors.black,
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
                     child: const Text("Login"),
                   ),
+            const SizedBox(height: 12),
             TextButton(
               onPressed: () async {
                 final authService =
@@ -80,7 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 );
               },
-              child: const Text("Resend Verification Email"),
+              child: const Text(
+                "Resend Verification Email",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),
