@@ -1,55 +1,71 @@
-// import 'package:flutter/material.dart';
-// import 'package:flame/game.dart';
-// import 'package:new_project/games/sentence_game.dart';
-// import 'package:new_project/services/sentence_service.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
+import '../games/litter_catcher_game.dart';
+import '../widgets/pause_menu.dart';
+import '../widgets/gmae_over_overlay.dart';
 
-// class GameScreen extends StatefulWidget {
-//   const GameScreen({Key? key}) : super(key: key);
+class GameScreen extends StatelessWidget {
+  final String controlMode;
 
-//   @override
-//   State<GameScreen> createState() => _GameScreenState();
-// }
+  const GameScreen({super.key, required this.controlMode});
 
-// class _GameScreenState extends State<GameScreen> {
-//   bool isLoading = true;
-//   Map<String, dynamic>? sentenceData;
+  @override
+  Widget build(BuildContext context) {
+    final game = LitterCatcherGame(controlMode: controlMode);
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     _loadData();
-//   }
-
-//   Future<void> _loadData() async {
-//     final fetched = await SentenceService().fetchRandomSentence();
-//     setState(() {
-//       sentenceData = fetched;
-//       isLoading = false;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     if (isLoading) {
-//       return const Scaffold(
-//         body: Center(child: CircularProgressIndicator()),
-//       );
-//     }
-
-//     if (sentenceData == null) {
-//       return Scaffold(
-//         body: const Center(child: Text("No data found")),
-//       );
-//     }
-
-//     final words = sentenceData!['correctPositions'] as List<dynamic>;
-//     final wordsData = words.cast<Map<String, dynamic>>();
-
-//     return Scaffold(
-//       appBar: AppBar(title: const Text("Sentence Drag Game")),
-//       body: GameWidget(
-//         game: SentenceGame(wordsData),
-//       ),
-//     );
-//   }
-// }
+    return Scaffold(
+      body: Stack(
+        children: [
+          GameWidget(
+            game: game,
+            overlayBuilderMap: {
+              'PauseMenu': (context, game) =>
+                  PauseMenu(game: game as LitterCatcherGame),
+              'GameOver': (context, game) {
+                final g = game as LitterCatcherGame;
+                return GameOverOverlay(
+                  score: g.score,
+                  coins: g.coinsEarned,
+                  onRestart: () {
+                    g.resetGame();
+                    g.overlays.remove('GameOver');
+                  },
+                );
+              },
+              'PauseButton': (context, game) => SafeArea(
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: IconButton(
+                          icon: const Icon(Icons.pause,
+                              size: 32, color: Colors.black),
+                          onPressed: () {
+                            (game as LitterCatcherGame).pauseGame();
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+            },
+            initialActiveOverlays: const ['PauseButton'],
+          ),
+          Align(
+            alignment: Alignment.topRight,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: IconButton(
+                  icon: const Icon(Icons.pause, color: Colors.black, size: 32),
+                  onPressed: () {
+                    game.pauseGame();
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

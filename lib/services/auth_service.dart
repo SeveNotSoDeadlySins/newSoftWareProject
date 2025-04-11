@@ -27,28 +27,26 @@ class AuthService extends ChangeNotifier {
         password: password,
       );
 
-      // 👇 TEMP FIX: Convert List<Object?> to Map<String, dynamic> if needed
-      Map<String, dynamic> userData =
-          userCredential.additionalUserInfo?.profile?.cast<String, dynamic>() ??
-              {};
-
-      // Send Email Verification
       await userCredential.user!.sendEmailVerification();
 
-      // Store user data in Firestore
+      // Store additional user data in Firestore with game fields
       await _firestore.collection("users").doc(userCredential.user!.uid).set({
         "uid": userCredential.user!.uid,
         "username": username,
         "email": email,
         "isVerified": false,
         "createdAt": DateTime.now(),
-        "extraData": userData, // 👈 Avoids List<Object?> issue
+        "coins": 0,
+        "ownedItems": [], // or add some default ones if needed
+        "equipped": {
+          "background": "default_bg", // default value you’ll handle later
+          "accessory": "none"
+        }
       });
 
       return "Verification email sent. Please verify your email.";
-    } catch (err, stackTrace) {
-      print("🔥 ERROR: $err");
-      print("🔥 STACKTRACE: $stackTrace");
+    } catch (err) {
+      print("Error: $err");
       return "Error: $err";
     }
   }
@@ -61,20 +59,28 @@ class AuthService extends ChangeNotifier {
         password: password,
       );
 
-      //  Check if email is verified
-      if (!userCredential.user!.emailVerified) {
-        await _auth.signOut(); // Log them out immediately
+      // Reload user to get latest emailVerified status
+      await userCredential.user!.reload();
+      final updatedUser = _auth.currentUser;
+
+      if (updatedUser != null && updatedUser.emailVerified) {
+        // ✅ Update isVerified to true in Firestore
+        await _firestore.collection("users").doc(updatedUser.uid).update({
+          "isVerified": true,
+        });
+      } else {
+        await _auth.signOut(); // Log them out
         return "Please verify your email before logging in.";
       }
 
-      //  Store locally for session management
+      // Save user session locally
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_id', userCredential.user!.uid);
+      await prefs.setString('user_id', updatedUser!.uid);
 
-      _user = userCredential.user;
+      _user = updatedUser;
       notifyListeners();
 
-      return "Success"; // Login successful
+      return "Success";
     } catch (err) {
       print("Error: $err");
       return "Error: $err";

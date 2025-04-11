@@ -13,18 +13,16 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>(); // For input validation
+  final _formKey = GlobalKey<FormState>();
 
   bool isLoading = false;
 
-  // Validate email format
   bool _isValidEmail(String email) {
     final emailRegex =
         RegExp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$');
     return emailRegex.hasMatch(email);
   }
 
-  // Function to handle sign up
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -40,7 +38,6 @@ class _SignupScreenState extends State<SignupScreen> {
         usernameController.text.trim(),
       );
 
-      // If sign-up is successful, show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result ?? "Sign Up Failed"),
@@ -49,12 +46,10 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
 
-      // Redirect to waiting verification page if sign-up was successful
       if (result.contains("Verification email sent")) {
         Navigator.pushReplacementNamed(context, "/waiting_verification");
       }
     } catch (e) {
-      // Handle unexpected errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Sign Up Failed: $e"),
@@ -68,25 +63,67 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  Widget _buildInputField({
+    required String hint,
+    required TextEditingController controller,
+    bool obscure = false,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscure,
+        validator: validator,
+        style: const TextStyle(color: Colors.black),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Sign Up")),
+      backgroundColor: const Color(0xFF7F00FF), // Purple background
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF7F00FF),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text("Sign Up", style: TextStyle(color: Colors.white)),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(32.0),
         child: Form(
           key: _formKey,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
+              _buildInputField(
+                hint: "Username",
                 controller: usernameController,
-                decoration: const InputDecoration(labelText: "Username"),
                 validator: (value) =>
                     value == null || value.isEmpty ? "Username required" : null,
               ),
-              TextFormField(
+              _buildInputField(
+                hint: "Email",
                 controller: emailController,
-                decoration: const InputDecoration(labelText: "Email"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Email required";
@@ -96,19 +133,36 @@ class _SignupScreenState extends State<SignupScreen> {
                   return null;
                 },
               ),
-              TextFormField(
+              _buildInputField(
+                hint: "Password",
                 controller: passwordController,
-                decoration: const InputDecoration(labelText: "Password"),
-                obscureText: true,
+                obscure: true,
                 validator: (value) => value != null && value.length < 6
                     ? "Password must be at least 6 characters"
                     : null,
               ),
               const SizedBox(height: 20),
               isLoading
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator(color: Colors.white)
                   : ElevatedButton(
                       onPressed: _signUp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF7F00FF),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          side: const BorderSide(color: Colors.black),
+                        ),
+                        elevation: 6,
+                        shadowColor: Colors.black,
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
                       child: const Text("Sign Up"),
                     ),
             ],
