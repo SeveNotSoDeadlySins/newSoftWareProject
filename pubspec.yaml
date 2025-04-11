@@ -36,8 +36,8 @@ dependencies:
   sensors_plus: ^3.0.2
 
   flame: ^1.26.0
-  flame_audio: ^2.11.1  # (Optional) For adding sound effects
-  flame_tiled: ^2.0.2  # (Optional) If you use tiled maps
+  flame_audio: ^2.11.1  # For adding sound effects
+  flame_tiled: ^2.0.2  # If you use tiled maps
 
   # UI Components
   cupertino_icons: ^1.0.8
@@ -50,8 +50,14 @@ dependencies:
   # Google Sign-In
   google_sign_in: ^6.2.1  
 
-  # State Management (Optional)
+  # State Management 
   provider: ^6.1.2
+
+  # For picking images from the gallery or camera
+  image_picker: ^1.0.4
+
+  firebase_storage: ^12.4.4
+  
 
 
 dev_dependencies:
@@ -75,9 +81,14 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/backgrounds/
+    - assets/backgrounds/galaxy.png
+    - assets/backgrounds/default_bg.png
+    - assets/backgrounds/bg_forest.png
+    - assets/backgrounds/purple.png
+    - assets/backgrounds/purple.png.png
+    
 
-
-      
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

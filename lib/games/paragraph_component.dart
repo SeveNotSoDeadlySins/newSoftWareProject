@@ -74,7 +74,7 @@ class ParagraphComponent extends PositionComponent {
 
         if (distance < 40) {
           placedWords[i] = word;
-          print("✅ Snapped '$word' into index $i at $blankPos");
+          print(" Snapped '$word' into index $i at $blankPos");
           return blankPos;
         }
 

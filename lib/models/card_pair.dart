@@ -13,7 +13,7 @@ class CardPair {
     required this.binImage,
   });
 
-  factory CardPair.fromFirestore(Map<String, dynamic> data) {
+  factory CardPair.fromMap(Map<String, dynamic> data) {
     return CardPair(
       item: data['item'],
       match: data['match'],

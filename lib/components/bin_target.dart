@@ -9,8 +9,9 @@ class BinTargetComponent extends SpriteComponent {
     required this.matchKey,
   }) : super(
           sprite: sprite,
-          size: Vector2.all(80),
           position: position,
+          size: Vector2.all(72),
           anchor: Anchor.center,
+          priority: 1, // So it will be on top of the trash
         );
 }

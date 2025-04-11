@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import '../games/litter_catcher_game.dart';
 import '../widgets/pause_menu.dart';
+import '../widgets/gmae_over_overlay.dart';
 
 class GameScreen extends StatelessWidget {
   final String controlMode;
@@ -20,8 +21,34 @@ class GameScreen extends StatelessWidget {
             overlayBuilderMap: {
               'PauseMenu': (context, game) =>
                   PauseMenu(game: game as LitterCatcherGame),
+              'GameOver': (context, game) {
+                final g = game as LitterCatcherGame;
+                return GameOverOverlay(
+                  score: g.score,
+                  coins: g.coinsEarned,
+                  onRestart: () {
+                    g.resetGame();
+                    g.overlays.remove('GameOver');
+                  },
+                );
+              },
+              'PauseButton': (context, game) => SafeArea(
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: IconButton(
+                          icon: const Icon(Icons.pause,
+                              size: 32, color: Colors.black),
+                          onPressed: () {
+                            (game as LitterCatcherGame).pauseGame();
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
             },
-            initialActiveOverlays: const [],
+            initialActiveOverlays: const ['PauseButton'],
           ),
           Align(
             alignment: Alignment.topRight,
@@ -35,20 +62,6 @@ class GameScreen extends StatelessWidget {
                   },
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 20,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const EcoMatchScreen()),
-                );
-              },
-              child: const Text('Play Eco Match'),
             ),
           ),
         ],

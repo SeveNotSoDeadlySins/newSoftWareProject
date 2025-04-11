@@ -44,3 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 .qodo
+
+/firebase-delete-users/node_modules
+/firebase-delete-users/serviceAccountKey.json
