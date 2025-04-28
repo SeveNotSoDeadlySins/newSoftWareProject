@@ -1,43 +1,35 @@
-import 'package:flame/game.dart';
-import 'package:new_project/games/paragraph_component.dart';
-import 'package:new_project/games/draggable_word.dart';
+// File: lib/components/draggable_word.dart
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import '../components/draggable_card.dart';
 
-class MyGame extends FlameGame {
-  late ParagraphComponent paragraph;
-  late List<DraggableWord> draggableWords;
-  final Map<String, dynamic> gameData;
-  bool isPaused = false; // Track pause state
+class DraggableWord extends TextComponent with DragCallbacks {
+  final String word;
+  late Vector2 _startPosition;
 
-  MyGame(this.gameData);
+  DraggableWord(this.word, Vector2 position)
+      : super(
+          text: word,
+          position: position,
+          anchor: Anchor.center,
+          priority: 1,
+        );
 
   @override
   Future<void> onLoad() async {
-    String text = gameData['text'];
-    List<String> missingWords = List<String>.from(gameData['words']);
-
-    paragraph = ParagraphComponent(text, missingWords);
-    paragraph.position = Vector2(50, 100);
-    add(paragraph);
-
-    draggableWords = missingWords
-        .asMap()
-        .entries
-        .map((entry) =>
-            DraggableWord(entry.value, Vector2(100 * (entry.key + 1), 400)))
-        .toList();
-
-    for (var word in draggableWords) {
-      add(word);
-    }
+    await super.onLoad();
+    _startPosition = position.clone();
   }
 
-  void pauseGame() {
-    isPaused = true;
-    pauseEngine();
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    position += event.localDelta;
   }
 
-  void resumeGame() {
-    isPaused = false;
-    resumeEngine();
+  @override
+  void onDragEnd(DragEndEvent event) {
+    // Here you can implement logic like checking if it overlaps a blank
+    position.setFrom(
+        _startPosition); // Return to original position if not dropped correctly
   }
 }

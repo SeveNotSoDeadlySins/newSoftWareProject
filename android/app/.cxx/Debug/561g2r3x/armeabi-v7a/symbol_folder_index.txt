@@ -1,0 +1,1 @@
+C:\xampp\htdocs\newSoftWareProject\build\app\intermediates\cxx\Debug\561g2r3x\obj\armeabi-v7a

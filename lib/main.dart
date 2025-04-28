@@ -7,15 +7,15 @@ import 'screens/home_screen.dart';
 import 'screens/waiting_verification_screen.dart';
 import 'services/auth_service.dart';
 import 'package:provider/provider.dart';
+import 'provider/background_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Initialize Firebase
+  await Firebase.initializeApp();
+  bool isDarkMode = await getThemePreference();
 
-  bool isDarkMode = await getThemePreference(); // Load theme preference
-
-  runApp(MyApp(isDarkMode: isDarkMode)); // Pass theme preference to MyApp
+  runApp(MyApp(isDarkMode: isDarkMode));
 }
 
 // Save Dark Mode Preference
@@ -57,14 +57,43 @@ class MyApp extends StatelessWidget {
             create: (context) => AuthService()), // Authentication Provider
         ChangeNotifierProvider(
             create: (context) => ThemeProvider(isDarkMode)), // Theme Provider
+        ChangeNotifierProvider(
+            create: (_) => BackgroundProvider()), // Background Provider
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Flutter App',
-            theme:
-                themeProvider.isDarkMode ? ThemeData.dark() : ThemeData.light(),
+            theme: ThemeData(
+              useMaterial3: true,
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  elevation: 6, // adds drop shadow
+                  backgroundColor:
+                      const Color(0xFF6A5ACD), // fallback base color
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    side: const BorderSide(color: Colors.black, width: 1.5),
+                  ),
+                ).copyWith(
+                  backgroundColor:
+                      MaterialStateProperty.resolveWith<Color>((states) {
+                    return Colors
+                        .transparent; // will be overridden with gradient
+                  }),
+                  shadowColor: MaterialStateProperty.all(Colors.black),
+                ),
+              ),
+            ),
             initialRoute: '/welcome',
             routes: {
               '/welcome': (context) => const WelcomeScreen(),
